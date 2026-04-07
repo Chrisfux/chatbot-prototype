@@ -133,6 +133,7 @@
         .input-group { display: flex; gap: 12px; align-items: center; }
         .input-wrap {
             flex: 1;
+            min-width: 0;
             display: flex;
             align-items: center;
             border: 2px solid rgba(16, 98, 153, 0.2);
@@ -206,18 +207,28 @@
         /* Mobile Optimierungen */
         @media (max-width: 600px) {
             .chat-container {
+                left: 10px;
                 right: 10px;
-                bottom: 100px;
-                width: calc(100vw - 20px);
-                max-width: none;
+                bottom: 10px;
+                width: auto;
+                max-width: calc(100vw - 20px);
+                max-height: 85vh;
+            }
+            .chat-input {
+                padding: 16px 12px 16px;
             }
             .input-group {
                 gap: 8px;
+                width: 100%;
+            }
+            .input-wrap {
+                padding-right: 10px;
             }
             .send-btn {
-                width: 60px;
-                height: 60px;
+                width: 56px;
+                height: 56px;
                 font-size: 20px;
+                min-width: 56px;
             }
             .mic-btn {
                 width: 40px;
