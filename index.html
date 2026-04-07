@@ -59,7 +59,7 @@
             transform: translateY(100%) scale(0.9);
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 999;
+            z-index: 1001;
         }
         .chat-container.open {
             transform: translateY(0) scale(1);
@@ -130,7 +130,7 @@
         .chip:hover { background: #cbd5e1; transform: translateY(-1px); }
         .chip:active { border-color: #106299; }
         .chat-input { padding: 20px; background: white; border-top: 1px solid rgba(16, 98, 153, 0.1); }
-        .input-group { display: flex; gap: 12px; align-items: center; }
+        .input-group { display: flex; gap: 12px; align-items: stretch; }
         .input-wrap {
             flex: 1;
             min-width: 0;
@@ -138,9 +138,10 @@
             align-items: center;
             border: 2px solid rgba(16, 98, 153, 0.2);
             border-radius: 25px;
-            padding: 0 12px 0 0;
+            padding: 0 10px 0 16px;
             transition: all 0.2s;
             background: white;
+            position: relative;
         }
         .input-wrap:focus-within {
             border-color: #106299;
@@ -148,12 +149,13 @@
         }
         input[type="text"] {
             flex: 1;
-            padding: 14px 16px 14px 20px;
+            padding: 14px 50px 14px 7px;
             border: none;
             border-radius: 25px;
             font-size: 16px;
             outline: none;
             background: transparent;
+            min-width: 0;
         }
         .mic-btn {
             width: 38px; height: 38px;
@@ -166,11 +168,14 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
-            flex-shrink: 0;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
         }
         .mic-btn:hover {
             background: #dcecf8;
-            transform: scale(1.05);
+            transform: translateY(-50%) scale(1.05);
         }
         .mic-btn.listening {
             background: #106299;
@@ -179,11 +184,11 @@
             animation: micPulse 1.2s infinite;
         }
         @keyframes micPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            0%, 100% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.08); }
         }
         .send-btn {
-            width: 50px; height: 50px; border: none; border-radius: 50%;
+            width: 50px; min-width: 50px; height: 100%; border: none; border-radius: 50%;
             background: linear-gradient(135deg, #106299 0%, #1E80B3 100%);
             color: white; cursor: pointer; font-size: 18px; transition: all 0.2s;
             flex-shrink: 0;
@@ -220,6 +225,7 @@
             .input-group {
                 gap: 8px;
                 width: 100%;
+                min-width: 0;
             }
             .input-wrap {
                 padding-right: 10px;
