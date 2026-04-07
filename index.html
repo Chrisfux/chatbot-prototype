@@ -202,6 +202,28 @@
             min-height: 16px;
         }
         .mic-status.active { color: #106299; font-weight: 500; }
+
+        /* Mobile Optimierungen */
+        @media (max-width: 600px) {
+            .chat-container {
+                right: 10px;
+                bottom: 100px;
+                width: calc(100vw - 20px);
+                max-width: none;
+            }
+            .input-group {
+                gap: 8px;
+            }
+            .send-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+            .mic-btn {
+                width: 40px;
+                height: 40px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -238,7 +260,7 @@
         <div class="chat-input">
             <div class="input-group">
                 <div class="input-wrap">
-                    <input type="text" id="userInput" placeholder="Deine Frage zu IT-Sicherheit..." autocomplete="off">
+                    <input type="text" id="userInput" placeholder="Deine Frage zu IT-Sicherheit..." autocomplete="off" enterkeyhint="send">
                     <button class="mic-btn" id="micBtn" onclick="toggleSpeechInput()" title="Mit Sprache eingeben" aria-label="Mit Sprache eingeben">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
