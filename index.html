@@ -28,13 +28,17 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; align-items: center; justify-content: center;
             z-index: 1000;
+            pointer-events: auto;
+        }
+        .chat-launcher > * {
+            pointer-events: none;
         }
         .chat-launcher:hover {
             transform: scale(1.08) rotate(5deg);
             box-shadow: 0 16px 50px rgba(149, 29, 64, 0.5);
         }
         .chat-launcher:active { transform: scale(0.98); }
-        .chat-icon-launch { width: 28px; height: 28px; fill: white; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); }
+        .chat-icon-launch { width: 28px; height: 28px; fill: white; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); pointer-events: none; }
         .badge {
             position: absolute; top: -4px; right: -4px;
             width: 20px; height: 20px;
@@ -44,6 +48,7 @@
             font-size: 11px; font-weight: bold; color: white;
             box-shadow: 0 2px 8px rgba(16, 98, 153, 0.4);
             animation: pulse 2s infinite;
+            pointer-events: none;
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
@@ -274,7 +279,10 @@
 <body>
     <div class="chat-launcher" id="launcher" onclick="toggleChat()">
         <svg class="chat-icon-launch" viewBox="0 0 24 24">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2l8 0v4l4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path>
+            <path fill="white" d="M4 2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6l-4 4v-4H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+            <circle fill="#B8324F" cx="8.5" cy="10.5" r="1.4"/>
+            <circle fill="#B8324F" cx="12" cy="10.5" r="1.4"/>
+            <circle fill="#B8324F" cx="15.5" cy="10.5" r="1.4"/>
         </svg>
         <div class="badge" id="badge" style="display: none;">1</div>
     </div>
@@ -283,7 +291,10 @@
         <div class="chat-header">
             <div class="chat-header-top">
                 <svg class="chat-icon-header" viewBox="0 0 24 24">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2l8 0v4l4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path>
+                    <path fill="white" d="M4 2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6l-4 4v-4H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+                    <circle fill="#B8324F" cx="8.5" cy="10.5" r="1.4"/>
+                    <circle fill="#B8324F" cx="12" cy="10.5" r="1.4"/>
+                    <circle fill="#B8324F" cx="15.5" cy="10.5" r="1.4"/>
                 </svg>
                 <h1>Bob</h1>
             </div>
@@ -323,6 +334,7 @@
         let recognition = null;
         let isListening = false;
         let firstOpen = true;
+        let isResponding = false;
 
         function toggleChat() {
             const container = document.getElementById('chatContainer');
@@ -333,7 +345,9 @@
                 launcher.style.opacity = '0.5';
                 document.getElementById('badge').style.display = 'none';
                 if (firstOpen) {
-                    startTyping();
+                    if (!isResponding) {
+                        startTyping();
+                    }
                 } else {
                     addGreetingChips();
                 }
@@ -370,6 +384,7 @@
         }
 
         function startTyping() {
+            isResponding = true;
             const messages = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message bot';
@@ -391,7 +406,7 @@
                 const bubble = document.createElement('div');
                 bubble.className = 'message-bubble bot-bubble';
                 messageDiv.appendChild(bubble);
-                typewriter(bubble, plainText, htmlText);
+                typewriter(bubble, htmlText);
             }, 2000);
         }
 
@@ -408,10 +423,11 @@
             messageDiv.appendChild(bubble);
             messages.appendChild(messageDiv);
             messages.scrollTop = messages.scrollHeight;
-            typewriter(bubble, plain, html);
+            typewriter(bubble, html);
         }
 
         function addBotResponseWithTyping(plain, html) {
+            isResponding = true;
             const messages = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message bot';
@@ -431,30 +447,85 @@
                 const bubble = document.createElement('div');
                 bubble.className = 'message-bubble bot-bubble';
                 messageDiv.appendChild(bubble);
-                typewriter(bubble, plain, html);
+                typewriter(bubble, html);
             }, 2000);
         }
 
-        function typewriter(bubble, plain, html) {
+        function typewriter(bubble, html) {
+            bubble.innerHTML = html;
+            const segments = [];
+            let position = 0;
+
+            function collect(node) {
+                node.childNodes.forEach(child => {
+                    if (child.nodeType === Node.TEXT_NODE) {
+                        const text = child.data;
+                        segments.push({ type: 'text', node: child, text, length: text.length });
+                        position += text.length;
+                    } else if (child.nodeType === Node.ELEMENT_NODE) {
+                        if (child.tagName === 'BR') {
+                            segments.push({ type: 'br', node: child, position });
+                        } else {
+                            collect(child);
+                        }
+                    }
+                });
+            }
+
+            collect(bubble);
+            segments.forEach(segment => {
+                if (segment.type === 'text') {
+                    segment.node.textContent = '';
+                } else if (segment.type === 'br') {
+                    segment.node.style.display = 'none';
+                }
+            });
+
+            const fullLength = position;
             let i = 0;
-            const interval = setInterval(() => {
-                bubble.textContent = plain.substring(0, i);
+
+            function updateText() {
                 i++;
-                if (i > plain.length) {
+                let remaining = i;
+
+                segments.forEach(segment => {
+                    if (segment.type === 'text') {
+                        if (remaining <= 0) {
+                            segment.node.textContent = '';
+                            return;
+                        }
+                        if (remaining >= segment.length) {
+                            segment.node.textContent = segment.text;
+                            remaining -= segment.length;
+                        } else {
+                            segment.node.textContent = segment.text.slice(0, remaining);
+                            remaining = 0;
+                        }
+                    } else if (segment.type === 'br') {
+                        segment.node.style.display = segment.position <= i ? '' : 'none';
+                    }
+                });
+            }
+
+            updateText();
+            const interval = setInterval(() => {
+                if (i >= fullLength) {
                     clearInterval(interval);
-                    bubble.innerHTML = html;
                     if (firstOpen) {
                         firstOpen = false;
                         addGreetingChips();
                     }
+                    isResponding = false;
+                    return;
                 }
+                updateText();
             }, 50);
         }
 
         function sendMessage() {
             const input = document.getElementById('userInput');
             const text = input.value.trim();
-            if (!text) return;
+            if (!text || isResponding) return;
 
             addMessage(text, 'user');
             input.value = '';
