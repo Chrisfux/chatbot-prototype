@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>Bob Chatbot Marktplatz Prototyp</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -120,20 +121,24 @@
             box-shadow: 0 2px 10px rgba(149, 29, 64, 0.1); 
             border-left: 4px solid #951D40;
         }
-        .typing-dots {
-            font-size: 24px;
-            line-height: 1;
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 12px;
+            align-self: center;
         }
-        .typing-dots .dot {
-            display: inline-block;
-            animation: bounce 1.4s infinite ease-in-out both;
+        .typing-circle {
+            font-size: 16px;
+            color: #6B7280;
+            animation: typingBounce 1.4s infinite ease-in-out both;
         }
-        .typing-dots .dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dots .dot:nth-child(2) { animation-delay: -0.16s; }
-        .typing-dots .dot:nth-child(3) { animation-delay: 0s; }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+        .typing-circle:nth-child(1) { animation-delay: -0.32s; }
+        .typing-circle:nth-child(2) { animation-delay: -0.16s; }
+        .typing-circle:nth-child(3) { animation-delay: 0s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
         }
         .user-bubble { background: linear-gradient(135deg, #106299 0%, #1E80B3 100%); color: white; }
         .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
@@ -371,16 +376,21 @@
             const avatar = document.createElement('div');
             avatar.className = 'message-avatar bot-avatar';
             avatar.innerHTML = 'B';
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble bot-bubble';
-            bubble.innerHTML = '<span class="typing-dots"><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.innerHTML = '<i class="material-icons typing-circle">lens</i><i class="material-icons typing-circle">lens</i><i class="material-icons typing-circle">lens</i>';
             messageDiv.appendChild(avatar);
-            messageDiv.appendChild(bubble);
+            messageDiv.appendChild(typingIndicator);
             messages.appendChild(messageDiv);
             messages.scrollTop = messages.scrollHeight;
             const plainText = 'Hallo! Ich bin Bob, und beantworte Fragen zum Thema IT-Sicherheit. Was möchtest du wissen?';
             const htmlText = 'Hallo! Ich bin <strong>Bob</strong>, und beantworte Fragen zum Thema IT-Sicherheit.<br><br>Was möchtest du wissen?';
             setTimeout(() => {
+                // Entferne Typing-Indikator und füge Bubble hinzu
+                messageDiv.removeChild(typingIndicator);
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble bot-bubble';
+                messageDiv.appendChild(bubble);
                 typewriter(bubble, plainText, htmlText);
             }, 2000);
         }
@@ -401,6 +411,30 @@
             typewriter(bubble, plain, html);
         }
 
+        function addBotResponseWithTyping(plain, html) {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar bot-avatar';
+            avatar.innerHTML = 'B';
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.innerHTML = '<i class="material-icons typing-circle">lens</i><i class="material-icons typing-circle">lens</i><i class="material-icons typing-circle">lens</i>';
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(typingIndicator);
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+            setTimeout(() => {
+                // Entferne Typing-Indikator und füge Bubble hinzu
+                messageDiv.removeChild(typingIndicator);
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble bot-bubble';
+                messageDiv.appendChild(bubble);
+                typewriter(bubble, plain, html);
+            }, 2000);
+        }
+
         function typewriter(bubble, plain, html) {
             let i = 0;
             const interval = setInterval(() => {
@@ -414,7 +448,7 @@
                         addGreetingChips();
                     }
                 }
-            }, 30);
+            }, 50);
         }
 
         function sendMessage() {
@@ -441,7 +475,7 @@
                         "Ransomware Tipps": 'Tipps gegen Ransomware: News: "Neuer LockBit-Angriff" (03.04.2026) → News lesen Artikel: "Ransomware-Abwehrstrategie" → Artikel lesen',
                         "IT-Sicherheitsnews": 'Neueste IT-Sicherheitsnews: News: "Patchday April 2026" (heute) → News lesen Artikel: "Wochenrückblick IT-Sicherheit" → Artikel lesen'
                     };
-                    addTypingMessage(plainResponses[text], chipResponses[text], 'bot');
+                    addBotResponseWithTyping(plainResponses[text], chipResponses[text]);
                 }, 800);
                 return;
             }
@@ -453,7 +487,7 @@
                     `Hier wird dann die Antwort des RAG Systems stehen zu deiner Frage: "${text}"!`
                 ];
                 const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addTypingMessage(randomResponse, randomResponse, 'bot');
+                addBotResponseWithTyping(randomResponse, randomResponse);
             }, 800);
         }
 
