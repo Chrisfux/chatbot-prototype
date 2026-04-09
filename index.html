@@ -52,7 +52,7 @@
         .chat-container {
             position: fixed;
             bottom: 120px; right: 30px;
-            width: 400px; max-width: 90vw; max-height: 70vh;
+            width: 400px; max-width: 90vw; height: 70vh;
             background: white; border-radius: 20px; 
             box-shadow: 0 20px 60px rgba(149, 29, 64, 0.25);
             display: flex; flex-direction: column; overflow: hidden;
@@ -119,6 +119,21 @@
             background: #FDF2F4; color: #5B1A32;
             box-shadow: 0 2px 10px rgba(149, 29, 64, 0.1); 
             border-left: 4px solid #951D40;
+        }
+        .typing-dots {
+            font-size: 24px;
+            line-height: 1;
+        }
+        .typing-dots .dot {
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dots .dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots .dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing-dots .dot:nth-child(3) { animation-delay: 0s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
         }
         .user-bubble { background: linear-gradient(135deg, #106299 0%, #1E80B3 100%); color: white; }
         .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
@@ -189,7 +204,7 @@
             50% { transform: translateY(-50%) scale(1.08); }
         }
         .send-btn {
-            width: 50px; min-width: 50px; height: 100%; border: none; border-radius: 50%;
+            width: 52px; min-width: 52px; height: 52px; border: none; border-radius: 50%;
             background: linear-gradient(135deg, #106299 0%, #1E80B3 100%);
             color: white; cursor: pointer; font-size: 18px; transition: all 0.2s;
             flex-shrink: 0;
@@ -225,7 +240,7 @@
                 bottom: 2px;
                 width: auto;
                 max-width: calc(100vw - 20px);
-                max-height: 85vh;
+                height: 85vh;
             }
             .chat-input {
                 padding: 12px 12px;
@@ -272,14 +287,6 @@
         </div>
 
         <div class="chat-messages" id="messages">
-            <div class="message bot">
-                <div class="message-avatar bot-avatar">B</div>
-                <div class="message-bubble bot-bubble">
-                    Hallo! Ich bin <strong>Bob</strong>, und beantworte Fragen zum Thema IT-Sicherheit.
-                    <br><br>
-                    Was möchtest du wissen?
-                </div>
-            </div>
         </div>
 
         <div class="chat-input">
@@ -310,6 +317,7 @@
         let chatOpen = false;
         let recognition = null;
         let isListening = false;
+        let firstOpen = true;
 
         function toggleChat() {
             const container = document.getElementById('chatContainer');
@@ -319,7 +327,11 @@
                 container.classList.add('open');
                 launcher.style.opacity = '0.5';
                 document.getElementById('badge').style.display = 'none';
-                addGreetingChips();
+                if (firstOpen) {
+                    startTyping();
+                } else {
+                    addGreetingChips();
+                }
             } else {
                 container.classList.remove('open');
                 launcher.style.opacity = '1';
@@ -352,6 +364,59 @@
             messages.scrollTop = messages.scrollHeight;
         }
 
+        function startTyping() {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar bot-avatar';
+            avatar.innerHTML = 'B';
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble bot-bubble';
+            bubble.innerHTML = '<span class="typing-dots"><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>';
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+            const plainText = 'Hallo! Ich bin Bob, und beantworte Fragen zum Thema IT-Sicherheit. Was möchtest du wissen?';
+            const htmlText = 'Hallo! Ich bin <strong>Bob</strong>, und beantworte Fragen zum Thema IT-Sicherheit.<br><br>Was möchtest du wissen?';
+            setTimeout(() => {
+                typewriter(bubble, plainText, htmlText);
+            }, 2000);
+        }
+
+        function addTypingMessage(plain, html, sender) {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            const avatar = document.createElement('div');
+            avatar.className = `message-avatar ${sender}-avatar`;
+            avatar.innerHTML = 'B';
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${sender}-bubble`;
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+            typewriter(bubble, plain, html);
+        }
+
+        function typewriter(bubble, plain, html) {
+            let i = 0;
+            const interval = setInterval(() => {
+                bubble.textContent = plain.substring(0, i);
+                i++;
+                if (i > plain.length) {
+                    clearInterval(interval);
+                    bubble.innerHTML = html;
+                    if (firstOpen) {
+                        firstOpen = false;
+                        addGreetingChips();
+                    }
+                }
+            }, 30);
+        }
+
         function sendMessage() {
             const input = document.getElementById('userInput');
             const text = input.value.trim();
@@ -369,7 +434,14 @@
                         "Ransomware Tipps": `Tipps gegen Ransomware:<br><br><strong>📰 News:</strong> "Neuer LockBit-Angriff" (03.04.2026)<br><a href="https://marktplatz-it-sicherheit.de/news/lockbit-2026" target="_blank" class="link">→ News lesen</a><br><br><strong>📄 Artikel:</strong> "Ransomware-Abwehrstrategie"<br><a href="https://marktplatz-it-sicherheit.de/artikel/ransomware-strategie" target="_blank" class="link">→ Artikel lesen</a>`,
                         "IT-Sicherheitsnews": `Neueste IT-Sicherheitsnews:<br><br><strong>📰 News:</strong> "Patchday April 2026" (heute)<br><a href="https://marktplatz-it-sicherheit.de/news/patchday-april-2026" target="_blank" class="link">→ News lesen</a><br><br><strong>📄 Artikel:</strong> "Wochenrückblick IT-Sicherheit"<br><a href="https://marktplatz-it-sicherheit.de/artikel/wochenrueckblick-2026" target="_blank" class="link">→ Artikel lesen</a>`
                     };
-                    addMessage(chipResponses[text], 'bot');
+                    const plainResponses = {
+                        "Aktuelle Cyber-Angriffe": 'Hier sind aktuelle Infos zu Cyber-Angriffen: News: "Phishing-Welle erreicht Rekordhoch" (15.03.2026) → News lesen Artikel: "Top 5 Angriffe der Woche" → Artikel lesen',
+                        "Schutztools empfehlen": 'Gute Schutztools für Unternehmen: News: "Neue SIEM-Tools im Test" (02.04.2026) → News lesen Artikel: "Die besten 10 Tools 2026" → Artikel lesen',
+                        "Anbieter in meiner Region": 'Anbieter-Suche für deine Region: News: "Neue if(is) Partner in NRW" (01.04.2026) → News lesen Artikel: "Lokale Sicherheitsanbieter" → Artikel lesen',
+                        "Ransomware Tipps": 'Tipps gegen Ransomware: News: "Neuer LockBit-Angriff" (03.04.2026) → News lesen Artikel: "Ransomware-Abwehrstrategie" → Artikel lesen',
+                        "IT-Sicherheitsnews": 'Neueste IT-Sicherheitsnews: News: "Patchday April 2026" (heute) → News lesen Artikel: "Wochenrückblick IT-Sicherheit" → Artikel lesen'
+                    };
+                    addTypingMessage(plainResponses[text], chipResponses[text], 'bot');
                 }, 800);
                 return;
             }
@@ -380,7 +452,8 @@
                     `Hier wird dann die Antwort des RAG Systems stehen zu deiner Frage: "${text}"!`,
                     `Hier wird dann die Antwort des RAG Systems stehen zu deiner Frage: "${text}"!`
                 ];
-                addMessage(responses[Math.floor(Math.random() * responses.length)], 'bot');
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addTypingMessage(randomResponse, randomResponse, 'bot');
             }, 800);
         }
 
