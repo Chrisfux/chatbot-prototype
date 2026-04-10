@@ -57,10 +57,12 @@ body {
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1001;
+    pointer-events: none;
 }
 .chat-container.open {
     transform: translateY(0) scale(1);
     opacity: 1;
+    pointer-events: auto;
 }
 .chat-header {
     background: linear-gradient(135deg, #951D40 0%, #B8324F 70%, #D63353 100%);
